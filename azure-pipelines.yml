@@ -20,9 +20,16 @@ steps:
   inputs:
     targetType: 'inline'
     script: 'npm run build'
-
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Pipeline.Workspace)'
+    targetPath: '$(System.DefaultWorkingDirectory)/build'
     artifact: 'to-do'
     publishLocation: 'pipeline'
+- task: DownloadPipelineArtifact@2
+  inputs:
+    buildType: 'current'
+    artifactName: 'to-do'
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+
+
+
