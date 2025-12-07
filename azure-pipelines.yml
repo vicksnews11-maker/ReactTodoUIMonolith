@@ -1,20 +1,26 @@
 trigger: none
 pool: Default
+
+
 steps:
+
 - task: NodeTool@0
   displayName: To install Nodejs
   inputs:
     versionSource: 'spec'
-    versionSpec: '18.x'
+    versionSpec: '16.x'
+
 - task: PowerShell@2
   displayName:  NPM install
   inputs:
     targetType: 'inline'
     script: 'npm install'
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: 'npm run build'
+
 - task: ArchiveFiles@2
   displayName: 
   inputs:
