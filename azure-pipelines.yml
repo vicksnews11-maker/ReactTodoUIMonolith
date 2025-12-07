@@ -21,14 +21,6 @@ steps:
     targetType: 'inline'
     script: 'npm run build'
 
-- task: ArchiveFiles@2
-  displayName: 
-  inputs:
-    rootFolderOrFile: '$(System.DefaultWorkingDirectory)/Build'
-    includeRootFolder: true
-    archiveType: 'zip'
-    archiveFile: '$(System.DefaultWorkingDirectory)/Build.zip'
-
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Pipeline.Workspace)'
