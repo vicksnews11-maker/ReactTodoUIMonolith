@@ -1,36 +1,57 @@
 trigger: none
+
 pool: Default
 
-#---------------------- FRONTEND BUILD ----------------------
 stages:
+
+# ---------------------------------------------------
+# FRONTEND BUILD STAGE
+# ---------------------------------------------------
 - stage: Build
   displayName: "Build Frontend"
   jobs:
   - job: Build_Frontend
     steps:
+
+    # Install Node
     - task: NodeTool@0
       displayName: "Install Node v18"
       inputs:
         versionSource: 'spec'
         versionSpec: '18.x'
+
+    # Install dependencies + build React
     - script: |
         cd ReactTodoUIMonolith
-        npm install
+        npm ci
         npm run build
       displayName: "Build React App"
+
+    # Debug list (optional but helps detect path issues)
+    - script: |
+        dir ReactTodoUIMonolith /s
+      displayName: "Debug – List Folders"
+
+    # Publish build artifact
     - task: PublishBuildArtifacts@1
       displayName: "Publish Frontend Artifact"
       inputs:
         PathtoPublish: 'ReactTodoUIMonolith/build'
         ArtifactName: 'frontend_build'
         publishLocation: 'Container'
-#---------------------- FRONTEND DEPLOY ----------------------
+
+
+# ---------------------------------------------------
+# FRONTEND DEPLOY STAGE
+# ---------------------------------------------------
 - stage: Deploy
   displayName: "Deploy Frontend"
   dependsOn: Build
   jobs:
   - job: Deploy_Frontend
     steps:
+
+    # Download artifact from build stage
     - task: DownloadBuildArtifacts@1
       displayName: "Download Frontend Artifact"
       inputs:
@@ -38,14 +59,18 @@ stages:
         downloadType: 'single'
         artifactName: 'frontend_build'
         downloadPath: '$(Pipeline.Workspace)/frontend'
+
+    # Copy build files to VM
     - task: CopyFilesOverSSH@0
       displayName: "Copy React Build to Frontend VM"
       inputs:
         sshEndpoint: 'frontend-ssh'
-        sourceFolder: '$(Pipeline.Workspace)/frontend/frontend_build'
+        sourceFolder: '$(Pipeline.Workspace)/frontend/frontend_build/build'
         contents: '**'
         targetFolder: '/var/www/html'
         overwrite: true
+
+    # Restart nginx
     - task: SSH@0
       displayName: "Restart Nginx"
       inputs:
