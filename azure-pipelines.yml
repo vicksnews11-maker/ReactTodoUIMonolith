@@ -13,30 +13,30 @@ stages:
   - job: Build_Frontend
     steps:
 
-    # Install Node
+    # Install Node.js
     - task: NodeTool@0
       displayName: "Install Node v18"
       inputs:
         versionSource: 'spec'
         versionSpec: '18.x'
 
-    # Install dependencies + build React
+    # ✅ Build React App
     - script: |
-        cd ReactTodoUIMonolith
+        cd <REACT_FOLDER_PATH>
         npm ci
         npm run build
-      displayName: "Build React App"
+      displayName: "Build React Application"
 
-    # Debug list (optional but helps detect path issues)
+    # ✅ Debug (optional but helps identify paths)
     - script: |
-        dir ReactTodoUIMonolith /s
-      displayName: "Debug – List Folders"
+        dir <REACT_FOLDER_PATH> /s
+      displayName: "Debug Folder Structure"
 
-    # Publish build artifact
+    # ✅ Publish build artifact
     - task: PublishBuildArtifacts@1
       displayName: "Publish Frontend Artifact"
       inputs:
-        PathtoPublish: 'ReactTodoUIMonolith/build'
+        PathtoPublish: '<REACT_FOLDER_PATH>/build'
         ArtifactName: 'frontend_build'
         publishLocation: 'Container'
 
@@ -51,7 +51,7 @@ stages:
   - job: Deploy_Frontend
     steps:
 
-    # Download artifact from build stage
+    # ✅ Download artifact from build stage
     - task: DownloadBuildArtifacts@1
       displayName: "Download Frontend Artifact"
       inputs:
@@ -60,9 +60,9 @@ stages:
         artifactName: 'frontend_build'
         downloadPath: '$(Pipeline.Workspace)/frontend'
 
-    # Copy build files to VM
+    # ✅ Copy build files to Linux VM
     - task: CopyFilesOverSSH@0
-      displayName: "Copy React Build to Frontend VM"
+      displayName: "Copy React Build to NGINX Server"
       inputs:
         sshEndpoint: 'frontend-ssh'
         sourceFolder: '$(Pipeline.Workspace)/frontend/frontend_build/build'
@@ -70,9 +70,9 @@ stages:
         targetFolder: '/var/www/html'
         overwrite: true
 
-    # Restart nginx
+    # ✅ Restart NGINX
     - task: SSH@0
-      displayName: "Restart Nginx"
+      displayName: "Restart NGINX"
       inputs:
         sshEndpoint: 'frontend-ssh'
         runOptions: 'inline'
