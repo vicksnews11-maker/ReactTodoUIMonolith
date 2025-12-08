@@ -3,7 +3,6 @@ trigger: none
 pool: Default
 
 stages:
-
 # ---------------------------------------------------
 # FRONTEND BUILD STAGE
 # ---------------------------------------------------
@@ -17,7 +16,6 @@ stages:
         inputs:
           versionSource: 'spec'
           versionSpec: '18.x'
-
       - task: PowerShell@2
         displayName: "Build React Application"
         inputs:
@@ -25,15 +23,12 @@ stages:
           script: |
             npm ci
             npm run build
-
       - task: PublishBuildArtifacts@1
         displayName: "Publish Frontend Artifact"
         inputs:
           PathtoPublish: 'build'
           ArtifactName: 'frontend_build'
           publishLocation: 'Container'
-
-
 # ---------------------------------------------------
 # FRONTEND DEPLOY STAGE
 # ---------------------------------------------------
@@ -43,7 +38,6 @@ stages:
   jobs:
   - job: Deploy_Frontend
     steps:
-
       - task: DownloadBuildArtifacts@1
         displayName: "Download Frontend Artifact"
         inputs:
@@ -51,16 +45,14 @@ stages:
           downloadType: 'single'
           artifactName: 'frontend_build'
           downloadPath: '$(Pipeline.Workspace)/frontend'
-
       - task: CopyFilesOverSSH@0
         displayName: "Copy React Build to Temp"
         inputs:
           sshEndpoint: "frontend-ssh"
-          sourceFolder: "$(Pipeline.Workspace)/frontend/frontend_build/build"
+          sourceFolder: "$(Pipeline.Workspace)/frontend/frontend_build"
           contents: "**"
           targetFolder: "/tmp/frontend_build"
           overwrite: true
-
       # Fix permissions with sudo
       - task: SSH@0
         displayName: "Fix Permissions"
@@ -69,10 +61,10 @@ stages:
           runOptions: 'inline'
           inline: |
             sudo rm -rf /var/www/html/*
-            sudo mv /tmp/frontend_build/* /var/www/html/
+            sudo mkdir -p /var/www/html
+            sudo mv /tmp/react_build/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
           readyTimeout: '20000'
-
       - task: SSH@0
         displayName: "Restart NGINX"
         inputs:
