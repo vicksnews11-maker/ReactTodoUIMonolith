@@ -8,29 +8,36 @@ stages:
   jobs:
   - job: Build_Frontend
     steps:
+
     - task: NodeTool@0
-      inputs:
-       versionSource: 'spec'
-       versionSpec: '18.x'
       displayName: "Install Node v18"
-    - script: 
+      inputs:
+        versionSource: 'spec'
+        versionSpec: '18.x'
+
+    - script: |
         cd ReactTodoUIMonolith
         npm install
         npm run build
       displayName: "Build React App"
+
     - task: PublishBuildArtifacts@1
+      displayName: "Publish Frontend Artifact"
       inputs:
-        PathtoPublish: '$(ReactTodoUIMonolith/build)'
+        PathtoPublish: 'ReactTodoUIMonolith/build'
         ArtifactName: 'frontend_build'
         publishLocation: 'Container'
-      displayName: "Publish Frontend Artifact"
+
 #---------------------- FRONTEND DEPLOY ----------------------
 - stage: Deploy
   displayName: "Deploy Frontend"
+  dependsOn: Build
   jobs:
   - job: Deploy_Frontend
     steps:
+
     - task: DownloadBuildArtifacts@1
+      displayName: "Download Frontend Artifact"
       inputs:
         buildType: 'current'
         downloadType: 'single'
@@ -38,20 +45,19 @@ stages:
         downloadPath: '$(Pipeline.Workspace)/frontend'
 
     - task: CopyFilesOverSSH@0
+      displayName: "Copy React Build to Frontend VM"
       inputs:
         sshEndpoint: 'frontend-ssh'
-        sourceFolder: '$(Pipeline.Workspace)/frontend'
+        sourceFolder: '$(Pipeline.Workspace)/frontend/frontend_build'
+        contents: '**'
         targetFolder: '/var/www/html'
         overwrite: true
-      displayName: "Copy React Build to Frontend VM"
+
     - task: SSH@0
+      displayName: "Restart Nginx"
       inputs:
         sshEndpoint: 'frontend-ssh'
         runOptions: 'inline'
-        inline: 'sudo systemctl restart nginx'
+        inline: |
+          sudo systemctl restart nginx
         readyTimeout: '20000'
-      displayName: "Restart Nginx"  
-
-
-
-
