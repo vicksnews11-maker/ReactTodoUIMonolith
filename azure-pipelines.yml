@@ -1,35 +1,52 @@
 trigger: none
 pool: Default
 
+#---------------------- FRONTEND BUILD ----------------------
+stages:
+- stage: Build
+  displayName: "Build Frontend"
+  jobs:
+  - job: Build_Frontend
+    steps:
+    - task: NodeTool@0
+      inputs:
+       versionSource: 'spec'
+       versionSpec: '18.x'
+      displayName: "Install Node v18"
+    - script: 
+        cd ReactTodoUIMonolith
+        npm install
+        npm run build
+      displayName: "Build React App"
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(ReactTodoUIMonolith/build)'
+        ArtifactName: 'frontend_build'
+        publishLocation: 'Container'
+      displayName: "Publish Frontend Artifact"
+#---------------------- FRONTEND DEPLOY ----------------------
+- stage: Deploy
+  displayName: "Deploy Frontend"
+  jobs:
+  - job: Deploy_Frontend
+    steps:
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'frontend_build'
+        downloadPath: '$(Pipeline.Workspace)/frontend'
 
-steps:
+    - task: CopyFilesOverSSH@0
+      inputs:
+        sshEndpoint: 'frontend-ssh'
+        sourceFolder: '$(Pipeline.Workspace)/frontend'
+        targetFolder: '/var/www/html'
+        overwrite: true
+      displayName: "Copy React Build to Frontend VM"
+      
+      
 
-- task: NodeTool@0
-  displayName: To install Nodejs
-  inputs:
-    versionSource: 'spec'
-    versionSpec: '16.x'
-
-- task: PowerShell@2
-  displayName:  NPM install
-  inputs:
-    targetType: 'inline'
-    script: 'npm install'
-
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: 'npm run build'
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/build'
-    artifact: 'to-do'
-    publishLocation: 'pipeline'
-- task: DownloadPipelineArtifact@2
-  inputs:
-    buildType: 'current'
-    artifactName: 'to-do'
-    targetPath: '$(Build.ArtifactStagingDirectory)'
 
 
 
