@@ -45,6 +45,16 @@ stages:
           downloadType: 'single'
           artifactName: 'frontend_build'
           downloadPath: '$(Pipeline.Workspace)/frontend'
+      - task: PowerShell@2
+        displayName: "DEBUG — List downloaded artifact"
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "Pipeline Workspace:"
+            Write-Host "$(Pipeline.Workspace)"
+            Write-Host "----- DIRECTORY LIST -----"
+            Get-ChildItem -Recurse "$(Pipeline.Workspace)/frontend"
+
       - task: CopyFilesOverSSH@0
         displayName: "Copy React Build to Temp"
         inputs:
