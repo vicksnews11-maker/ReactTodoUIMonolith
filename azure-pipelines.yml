@@ -8,26 +8,22 @@ stages:
   jobs:
   - job: Build_Frontend
     steps:
-
     - task: NodeTool@0
       displayName: "Install Node v18"
       inputs:
         versionSource: 'spec'
         versionSpec: '18.x'
-
     - script: |
         cd ReactTodoUIMonolith
         npm install
         npm run build
       displayName: "Build React App"
-
     - task: PublishBuildArtifacts@1
       displayName: "Publish Frontend Artifact"
       inputs:
         PathtoPublish: 'ReactTodoUIMonolith/build'
         ArtifactName: 'frontend_build'
         publishLocation: 'Container'
-
 #---------------------- FRONTEND DEPLOY ----------------------
 - stage: Deploy
   displayName: "Deploy Frontend"
@@ -35,7 +31,6 @@ stages:
   jobs:
   - job: Deploy_Frontend
     steps:
-
     - task: DownloadBuildArtifacts@1
       displayName: "Download Frontend Artifact"
       inputs:
@@ -43,7 +38,6 @@ stages:
         downloadType: 'single'
         artifactName: 'frontend_build'
         downloadPath: '$(Pipeline.Workspace)/frontend'
-
     - task: CopyFilesOverSSH@0
       displayName: "Copy React Build to Frontend VM"
       inputs:
@@ -52,7 +46,6 @@ stages:
         contents: '**'
         targetFolder: '/var/www/html'
         overwrite: true
-
     - task: SSH@0
       displayName: "Restart Nginx"
       inputs:
