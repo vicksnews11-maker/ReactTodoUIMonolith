@@ -65,13 +65,27 @@ stages:
             sudo mkdir -p /var/www/html
             sudo mv /tmp/react_build/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
-          readyTimeout: '20000'
+          readyTimeout: '20000'  
       - task: SSH@0
-        displayName: "Restart NGINX"
+        displayName: "Install NGINX and Deploy Files"
         inputs:
           sshEndpoint: 'frontend-ssh'
           runOptions: 'inline'
           inline: |
+            echo "Checking if NGINX is installed..."
+            if ! command -v nginx &> /dev/null
+            then
+              echo "NGINX not found — installing..."
+              sudo apt update
+              sudo apt install -y nginx
+            fi
+
+            echo "Deploying frontend files..."
+            sudo rm -rf /var/www/html/*
+            sudo mkdir -p /var/www/html
+            sudo mv /tmp/react_build/* /var/www/html/
+            sudo chown -R www-data:www-data /var/www/html
+
+            echo "Restarting NGINX..."
             sudo systemctl restart nginx
           readyTimeout: '20000'
-
