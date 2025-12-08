@@ -50,6 +50,9 @@ stages:
           downloadType: 'single'
           artifactName: 'frontend_build'
           downloadPath: '$(Pipeline.Workspace)/frontend'
+      - script: |
+         dir $(Pipeline.Workspace)/frontend /s
+        displayName: "DEBUG: List downloaded artifact"
 
       - task: CopyFilesOverSSH@0
         displayName: "Copy React Build to Server"
