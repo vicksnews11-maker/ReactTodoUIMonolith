@@ -43,6 +43,7 @@ stages:
   jobs:
   - job: Deploy_Frontend
     steps:
+
       - task: DownloadBuildArtifacts@1
         displayName: "Download Frontend Artifact"
         inputs:
@@ -50,19 +51,16 @@ stages:
           downloadType: 'single'
           artifactName: 'frontend_build'
           downloadPath: '$(Pipeline.Workspace)/frontend'
-      - script: |
-         dir $(Pipeline.Workspace)/frontend /s
-        displayName: "DEBUG: List downloaded artifact"
 
       - task: CopyFilesOverSSH@0
         displayName: "Copy React Build to Server"
         inputs:
           sshEndpoint: 'frontend-ssh'
-          sourceFolder: '$(Pipeline.Workspace)/frontend/build'
+          sourceFolder: '$(Pipeline.Workspace)/frontend'
           contents: '**'
           targetFolder: '/var/www/html'
           overwrite: true
-    
+
       - task: SSH@0
         displayName: "Restart NGINX"
         inputs:
@@ -71,3 +69,4 @@ stages:
           inline: |
             sudo systemctl restart nginx
           readyTimeout: '20000'
+
