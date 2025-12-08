@@ -64,11 +64,13 @@ stages:
       - task: SSH@0
         displayName: "Fix Permissions"
         inputs:
-          sshEndpoint: "frontend-ssh"
-          runOptions: "inline"
+          sshEndpoint: 'frontend-ssh'
+          runOptions: 'inline'
           inline: |
-            sudo chown -R azureuser:azureuser /var/www/html
-            sudo chmod -R 755 /var/www/html
+            sudo rm -rf /var/www/html/*
+            sudo mv /tmp/frontend_build/* /var/www/html/
+            sudo chown -R www-data:www-data /var/www/html
+          readyTimeout: '20000'
 
       - task: SSH@0
         displayName: "Restart NGINX"
