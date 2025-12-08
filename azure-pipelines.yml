@@ -49,9 +49,9 @@ stages:
         displayName: "Copy React Build to Temp"
         inputs:
           sshEndpoint: "frontend-ssh"
-          sourceFolder: "$(Pipeline.Workspace)/frontend/frontend_build"
+          sourceFolder: "$(Pipeline.Workspace)/frontend/frontend_build/build"
           contents: "**"
-          targetFolder: "/tmp/frontend_build"
+          targetFolder: "/tmp/react_build"
           overwrite: true
       # Fix permissions with sudo
       - task: SSH@0
