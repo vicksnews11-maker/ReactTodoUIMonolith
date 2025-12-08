@@ -66,26 +66,39 @@ stages:
             sudo mv /tmp/react_build/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
           readyTimeout: '20000'  
+       
       - task: SSH@0
-        displayName: "Install NGINX and Deploy Files"
+        displayName: "Install & Configure NGINX"
         inputs:
-          sshEndpoint: 'frontend-ssh'
-          runOptions: 'inline'
-          inline: |
-            echo "Checking if NGINX is installed..."
-            if ! command -v nginx &> /dev/null
-            then
-              echo "NGINX not found — installing..."
-              sudo apt update
-              sudo apt install -y nginx
-            fi
+         sshEndpoint: 'frontend-ssh'
+         runOptions: 'inline'
+         inline: |
+          echo "Checking if NGINX is installed..."
+          if ! command -v nginx >/dev/null 2>&1; then
+            echo "NGINX not found — installing..."
+            sudo apt-get update -y
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nginx
+          else
+            echo "NGINX already installed."
+          fi
 
-            echo "Deploying frontend files..."
-            sudo rm -rf /var/www/html/*
-            sudo mkdir -p /var/www/html
-            sudo mv /tmp/react_build/* /var/www/html/
-            sudo chown -R www-data:www-data /var/www/html
+          echo "Configuring NGINX..."
+          sudo bash -c 'cat > /etc/nginx/sites-available/frontend <<EOF
+            server {
+                listen 80;
+                root /var/www/frontend;
+                index index.html;
+                location / {
+                    try_files \$uri /index.html;
+                }
+            }
+            EOF'
 
-            echo "Restarting NGINX..."
-            sudo systemctl restart nginx
+          sudo ln -sf /etc/nginx/sites-available/frontend /etc/nginx/sites-enabled/frontend
+          sudo rm -f /etc/nginx/sites-enabled/default
+
+          echo "Restarting NGINX..."
+          sudo systemctl enable nginx
+          sudo systemctl restart nginx
+          echo "NGINX restarted successfully."
           readyTimeout: '20000'
