@@ -60,6 +60,15 @@ stages:
           contents: '**'
           targetFolder: '/var/www/html'
           overwrite: true
+      # Fix permissions with sudo
+      - task: SSH@0
+        displayName: "Fix Permissions"
+        inputs:
+          sshEndpoint: "frontend-ssh"
+          runOptions: "inline"
+          inline: |
+            sudo chown -R azureuser:azureuser /var/www/html
+            sudo chmod -R 755 /var/www/html
 
       - task: SSH@0
         displayName: "Restart NGINX"
