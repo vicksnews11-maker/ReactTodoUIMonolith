@@ -55,11 +55,11 @@ stages:
         displayName: "Copy React Build to Server"
         inputs:
           sshEndpoint: 'frontend-ssh'
-          sourceFolder: '$(Pipeline.Workspace)/frontend/frontend_build/build'
+          sourceFolder: '$(Pipeline.Workspace)/frontend/build'
           contents: '**'
           targetFolder: '/var/www/html'
           overwrite: true
-
+    
       - task: SSH@0
         displayName: "Restart NGINX"
         inputs:
