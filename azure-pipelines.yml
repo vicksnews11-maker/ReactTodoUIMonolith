@@ -68,7 +68,7 @@ stages:
           readyTimeout: '20000'  
        
       - task: SSH@0
-        displayName: "1Install & Configure NGINX"
+        displayName: "Install & Configure NGINX"
         inputs:
          sshEndpoint: 'frontend-ssh'
          runOptions: 'inline'
