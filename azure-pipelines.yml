@@ -3,9 +3,7 @@ trigger: none
 pool: Default
 
 stages:
-# ---------------------------------------------------
-# FRONTEND BUILD STAGE
-# ---------------------------------------------------
+# FRONTEND BUILD STAGE---------------------------------------------------
 - stage: Build
   displayName: "Build Frontend"
   jobs:
@@ -29,9 +27,7 @@ stages:
           PathtoPublish: 'build'
           ArtifactName: 'frontend_build'
           publishLocation: 'Container'
-# ---------------------------------------------------
-# FRONTEND DEPLOY STAGE
-# ---------------------------------------------------
+# FRONTEND DEPLOY STAGE---------------------------------------------------
 - stage: Deploy
   displayName: "Deploy Frontend"
   dependsOn: Build
@@ -54,7 +50,7 @@ stages:
           contents: "**"
           targetFolder: "/tmp/react_build"
           overwrite: true
-      # Fix permissions with sudo
+# Fix permissions with sudo
       - task: SSH@0
         displayName: "Fix Permissions"
         inputs:
