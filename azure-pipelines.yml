@@ -21,6 +21,7 @@ stages:
           script: |
             npm ci
             npm run build
+      
       - task: PublishBuildArtifacts@1
         displayName: "Publish Frontend Artifact"
         inputs:
